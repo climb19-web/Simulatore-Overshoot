@@ -9,6 +9,16 @@ st.set_page_config(page_title="Simulatore Eco-Evolutivo 2075", layout="wide")
 st.title("PROIETTORE ECO-EVOLUTIVO 2075")
 st.caption("Versione Python - Simulazione di sistemi aperti: crescita e declino delle risorse.")
 
+# Inizializzazione Session State per evitare errori al primo caricamento
+initial_states = {
+    'fp_trend': 0.0, 'bc_trend': 0.0,
+    'res_war': False, 'tech_bt': False, 'rest_wave': False, 'eco_tip': False,
+    'year_res_war': 2030, 'year_tech_bt': 2035, 'year_rest_wave': 2040, 'year_eco_tip': 2045
+}
+for key, value in initial_states.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
+
 def reset_years():
     """Ripristina gli anni predefiniti degli shock."""
     st.session_state.year_res_war = 2030
@@ -91,18 +101,20 @@ with st.sidebar:
         st.button("⚪ INVARIATO", on_click=reset_simulation, use_container_width=True)
 
 # Funzione per calcolare la simulazione
-def run_simulation():
+def run_simulation(fp_trend, bc_trend, shocks_active, shock_years):
     current_fp = 1.75
     current_bc = 1.0
     cumulative_debt = 0
     results = []
     
+    res_war, tech_bt, rest_wave, eco_tip = shocks_active
+
     for year in range(2026, 2076):
         # Applicazione Shock
-        if year == st.session_state.year_res_war and res_war: current_fp *= 1.10
-        if year == st.session_state.year_tech_bt and tech_bt: current_fp *= 0.85
-        if year == st.session_state.year_rest_wave and rest_wave: current_bc *= 1.12
-        if year == st.session_state.year_eco_tip and eco_tip: current_bc *= 0.80
+        if year == shock_years['res_war'] and res_war: current_fp *= 1.10
+        if year == shock_years['tech_bt'] and tech_bt: current_fp *= 0.85
+        if year == shock_years['rest_wave'] and rest_wave: current_bc *= 1.12
+        if year == shock_years['eco_tip'] and eco_tip: current_bc *= 0.80
         
         # Applicazione Trend
         current_fp *= (1 + fp_trend / 100)
@@ -129,7 +141,16 @@ def run_simulation():
         })
     return pd.DataFrame(results)
 
-df = run_simulation()
+# Esecuzione simulazione con parametri espliciti
+shocks_active = (res_war, tech_bt, rest_wave, eco_tip)
+shock_years = {
+    'res_war': st.session_state.year_res_war,
+    'tech_bt': st.session_state.year_tech_bt,
+    'rest_wave': st.session_state.year_rest_wave,
+    'eco_tip': st.session_state.year_eco_tip
+}
+
+df = run_simulation(fp_trend, bc_trend, shocks_active, shock_years)
 
 # Aggiunta pulsante download nella sidebar (ora che il dataframe df è pronto)
 with st.sidebar:
@@ -156,10 +177,14 @@ with col_chart:
     fig.add_trace(go.Scatter(x=df["Anno"], y=df["Biocapacità"], name="Biocapacità (B)", 
                              line=dict(color='#10b981', width=3), fill='tozeroy'))
     
+    # Linea di riferimento capacità base
+    fig.add_hline(y=1.0, line_dash="dash", line_color="rgba(100, 116, 139, 0.5)", 
+                  annotation_text="Soglia Rigenerazione 2026")
+
     fig.update_layout(
         hovermode="x unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=0, r=0, t=30, b=0),
+        margin=dict(l=0, r=0, t=40, b=0),
         height=400,
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)'
