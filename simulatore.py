@@ -26,7 +26,7 @@ initial_states = {
     'fp_trend': 0.0, 'bc_trend': 0.0,
     'res_war': False, 'tech_bt': False, 'rest_wave': False, 'eco_tip': False,
     'range_res_war': (2030, 2030), 'range_tech_bt': (2035, 2035), 'range_rest_wave': (2040, 2040), 'range_eco_tip': (2045, 2045),
-    'val_res_war': 10.0, 'val_tech_bt': -15.0, 'val_rest_wave': 12.0, 'val_eco_tip': -20.0
+    'val_res_war': 10.0, 'val_tech_bt': 15.0, 'val_rest_wave': 12.0, 'val_eco_tip': -20.0
 }
 for key, value in initial_states.items():
     if key not in st.session_state:
@@ -42,7 +42,7 @@ def reset_years():
 def reset_shock_vals():
     """Ripristina le intensità predefinite degli shock."""
     st.session_state.val_res_war = 10.0
-    st.session_state.val_tech_bt = -15.0
+    st.session_state.val_tech_bt = 15.0
     st.session_state.val_rest_wave = 12.0
     st.session_state.val_eco_tip = -20.0
 
@@ -90,7 +90,7 @@ def run_simulation(fp_trend, bc_trend, shocks_active, shock_years, shock_vals):
         # 1. APPLICAZIONE SHOCK (Variazioni discrete puntuali o durature)
         # Se l'anno corrente è all'interno dell'intervallo e lo shock è attivo
         if shock_years['res_war'][0] <= year <= shock_years['res_war'][1] and res_war: current_fp *= (1 + res_war_v / 100)
-        if shock_years['tech_bt'][0] <= year <= shock_years['tech_bt'][1] and tech_bt: current_fp *= (1 + tech_bt_v / 100)
+        if shock_years['tech_bt'][0] <= year <= shock_years['tech_bt'][1] and tech_bt: current_fp *= (1 - tech_bt_v / 100)
         if shock_years['rest_wave'][0] <= year <= shock_years['rest_wave'][1] and rest_wave: current_bc *= (1 + rest_wave_v / 100)
         if shock_years['eco_tip'][0] <= year <= shock_years['eco_tip'][1] and eco_tip: current_bc *= (1 + eco_tip_v / 100)
         
@@ -151,7 +151,7 @@ with st.sidebar:
     st.toggle("Svolta Tech", key="tech_bt")
     if st.session_state.tech_bt:
         st.slider("Periodo Svolta Tech", 2026, 2075, key="range_tech_bt")
-        st.slider("Intensità (%)", -50.0, 0.0, step=0.5, format="%.1f%%", key="val_tech_bt")
+        st.slider("Riduzione Impronta (%)", 0.0, 50.0, step=0.5, format="%.1f%%", key="val_tech_bt")
     
     st.toggle("Riforestazione", key="rest_wave")
     if st.session_state.rest_wave:
