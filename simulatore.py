@@ -146,22 +146,22 @@ with st.sidebar:
     st.toggle("Inefficienza", key="res_war")
     if st.session_state.res_war:
         st.slider("Periodo Inefficienza", 2026, 2075, key="range_res_war")
-        st.slider("Intensità (%)", 0.0, 50.0, step=0.5, format="%.1f%%", key="val_res_war")
+        st.slider("Intensità (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_res_war")
     
     st.toggle("Svolta Tech", key="tech_bt")
     if st.session_state.tech_bt:
         st.slider("Periodo Svolta Tech", 2026, 2075, key="range_tech_bt")
-        st.slider("Riduzione Impronta (%)", 0.0, 50.0, step=0.5, format="%.1f%%", key="val_tech_bt")
+        st.slider("Riduzione Impronta (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_tech_bt")
     
     st.toggle("Riforestazione", key="rest_wave")
     if st.session_state.rest_wave:
         st.slider("Periodo Riforestazione", 2026, 2075, key="range_rest_wave")
-        st.slider("Intensità (%)", 0.0, 50.0, step=0.5, format="%.1f%%", key="val_rest_wave")
+        st.slider("Intensità (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_rest_wave")
     
     st.toggle("Punto Critico", key="eco_tip")
     if st.session_state.eco_tip:
         st.slider("Periodo Punto Critico", 2026, 2075, key="range_eco_tip")
-        st.slider("Intensità (%)", -50.0, 0.0, step=0.5, format="%.1f%%", key="val_eco_tip")
+        st.slider("Intensità (%)", -50.0, 0.0, step=0.1, format="%.1f%%", key="val_eco_tip")
 
 # Esecuzione simulazione
 df = run_simulation(
