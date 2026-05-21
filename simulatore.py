@@ -16,6 +16,7 @@ st.markdown("""
     [data-testid="stMetricLabel"] { font-size: 0.9rem !important; }
     @media (max-width: 640px) {
         .main .block-container { padding-left: 0.8rem; padding-right: 0.8rem; }
+        [data-testid="stPlotlyChart"], [data-testid="stVegaLiteChart"] { pointer-events: none; }
     }
     </style>
 """, unsafe_allow_html=True)
