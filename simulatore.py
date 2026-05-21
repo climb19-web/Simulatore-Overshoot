@@ -16,7 +16,8 @@ st.markdown("""
     [data-testid="stMetricLabel"] { font-size: 0.9rem !important; }
     @media (max-width: 850px) {
         .main .block-container { padding-left: 0.8rem; padding-right: 0.8rem; }
-        [data-testid="stPlotlyChart"], [data-testid="stVegaLiteChart"], .js-plotly-plot { pointer-events: none !important; }
+        /* Disabilita interazione su ogni elemento interno ai grafici per evitare zoom/pan accidentali su mobile */
+        [data-testid="stPlotlyChart"] *, [data-testid="stVegaLiteChart"] * { pointer-events: none !important; }
     }
     </style>
 """, unsafe_allow_html=True)
