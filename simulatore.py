@@ -178,11 +178,8 @@ df = run_simulation(
     (st.session_state.val_res_war, st.session_state.val_tech_bt, st.session_state.val_rest_wave, st.session_state.val_eco_tip)
 )
 
-# Pulsante Download nella Sidebar
-with st.sidebar:
-    st.divider()
-    csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button("📥 Scarica Dati (CSV)", data=csv, file_name=f'simulazione_2075.csv', mime='text/csv', use_container_width=True)
+# Prepara i dati per il download (usato sia in sidebar che a fine pagina)
+csv_data = df.to_csv(index=False).encode('utf-8')
 
 # --- DASHBOARD PRINCIPALE ---
 col_chart, col_stats = st.columns([3, 1])
@@ -252,3 +249,18 @@ for y, col, title in zip(findings_years, [f_col1, f_col2, f_col3], titles):
         st.write(f"Debito: **{row['Debito Accumulato']}** Terre.")
         if y == 2075:
             st.caption("Risultato finale della strategia selezionata.")
+
+# --- SEZIONE DOWNLOAD PER MOBILE E DESKTOP ---
+st.divider()
+st.download_button(
+    label="📥 Scarica i Risultati della Simulazione (CSV)",
+    data=csv_data,
+    file_name=f'simulazione_2075.csv',
+    mime='text/csv',
+    use_container_width=True
+)
+
+# Mantengo il pulsante anche nella Sidebar per comodità Desktop
+with st.sidebar:
+    st.divider()
+    st.download_button("📥 Scarica Dati (CSV)", data=csv_data, file_name=f'simulazione_2075.csv', mime='text/csv', use_container_width=True)
