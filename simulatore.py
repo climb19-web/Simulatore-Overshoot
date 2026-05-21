@@ -4,7 +4,7 @@ import datetime
 import plotly.graph_objects as go
 
 # Configurazione della pagina
-st.set_page_config(page_title="Simulatore Eco-Evolutivo 2075", layout="wide")
+st.set_page_config(page_title="Simulatore Eco-Evolutivo 2075", layout="wide", initial_sidebar_state="auto")
 
 st.title("PROIETTORE ECO-EVOLUTIVO 2075")
 st.caption("Versione Python - Simulazione di sistemi aperti: crescita e declino delle risorse.")
@@ -15,8 +15,7 @@ st.markdown("""
     [data-testid="stMetricValue"] { font-size: 1.6rem !important; }
     [data-testid="stMetricLabel"] { font-size: 0.9rem !important; }
     @media (max-width: 640px) {
-        .main .block-container { padding-left: 1rem; padding-right: 1rem; }
-        [data-testid="stHeader"] { display: none; }
+        .main .block-container { padding-left: 0.8rem; padding-right: 0.8rem; }
     }
     </style>
 """, unsafe_allow_html=True)
