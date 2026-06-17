@@ -22,6 +22,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- BASELINE DIDATTICA ---
+dati_baseline = {"impronta": 21736852078.6, "biocapacita": 12068507633.5}
+base_ratio = dati_baseline['impronta'] / dati_baseline['biocapacita']
+
 # Inizializzazione Session State per evitare errori al primo caricamento
 initial_states = {
     'fp_trend': 0.0, 'bc_trend': 0.0,
@@ -79,7 +83,7 @@ def apply_collasso():
 
 # Funzione per calcolare la simulazione
 def run_simulation(fp_trend, bc_trend, shocks_active, shock_years, shock_vals):
-    current_fp = 1.8
+    current_fp = base_ratio
     current_bc = 1.0
     cumulative_debt = 0
     results = []
@@ -107,6 +111,7 @@ def run_simulation(fp_trend, bc_trend, shocks_active, shock_years, shock_vals):
         # 4. CALCOLO OVERSHOOT DAY
         # Proporzione della biocapacità rispetto all'impronta su base 365 giorni
         ratio = current_bc / current_fp
+        earths_consumed = current_fp / current_bc
         if ratio < 1:
             days = int(ratio * 365)
             dt = datetime.date(year, 1, 1) + datetime.timedelta(days=days)
@@ -118,6 +123,7 @@ def run_simulation(fp_trend, bc_trend, shocks_active, shock_years, shock_vals):
             "Anno": year,
             "Impronta": round(current_fp, 3),
             "Biocapacità": round(current_bc, 3),
+            "Terre Consumate": round(earths_consumed, 3),
             "Debito Accumulato": round(cumulative_debt, 2),
             "Overshoot": overshoot,
             "is_deficit": ratio < 1
@@ -128,9 +134,9 @@ def run_simulation(fp_trend, bc_trend, shocks_active, shock_years, shock_vals):
 with st.sidebar:
     st.header("⚙️ Dinamiche di Trend")
     st.write("**Baseline 2026 (Stime):**")
-    st.caption("👣 I: 21.736.852.078,6")
-    st.caption("🌱 B: 12.068.507.633,5")
-    st.write("🌍 Rapporto: **1.80 Terre**")
+    st.caption(f"👣 I: {dati_baseline['impronta']:,.1f}")
+    st.caption(f"🌱 B: {dati_baseline['biocapacita']:,.1f}")
+    st.write(f"🌍 Rapporto: **{base_ratio:.2f} Terre**")
     st.divider()
     
     st.slider("Trend Impronta (I) %", -3.0, 5.0, step=0.01, format="%.2f%%", key="fp_trend", help="Valore annuo composto.")
@@ -146,22 +152,34 @@ with st.sidebar:
     st.header("⚠️ Shock di Scenario")
     st.toggle("Inefficienza", key="res_war")
     if st.session_state.res_war:
-        st.slider("Periodo Inefficienza", 2026, 2075, key="range_res_war")
+        st.session_state.range_res_war = st.slider(
+            "Periodo Inefficienza", 2026, 2075, 
+            value=st.session_state.range_res_war
+        )
         st.slider("Intensità (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_res_war")
     
     st.toggle("Svolta Tech", key="tech_bt")
     if st.session_state.tech_bt:
-        st.slider("Periodo Svolta Tech", 2026, 2075, key="range_tech_bt")
+        st.session_state.range_tech_bt = st.slider(
+            "Periodo Svolta Tech", 2026, 2075,
+            value=st.session_state.range_tech_bt
+        )
         st.slider("Riduzione Impronta (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_tech_bt")
     
     st.toggle("Riforestazione", key="rest_wave")
     if st.session_state.rest_wave:
-        st.slider("Periodo Riforestazione", 2026, 2075, key="range_rest_wave")
+        st.session_state.range_rest_wave = st.slider(
+            "Periodo Riforestazione", 2026, 2075,
+            value=st.session_state.range_rest_wave
+        )
         st.slider("Intensità (%)", 0.0, 50.0, step=0.1, format="%.1f%%", key="val_rest_wave")
     
     st.toggle("Punto Critico", key="eco_tip")
     if st.session_state.eco_tip:
-        st.slider("Periodo Punto Critico", 2026, 2075, key="range_eco_tip")
+        st.session_state.range_eco_tip = st.slider(
+            "Periodo Punto Critico", 2026, 2075,
+            value=st.session_state.range_eco_tip
+        )
         st.slider("Intensità (%)", -50.0, 0.0, step=0.1, format="%.1f%%", key="val_eco_tip")
 
 # Esecuzione simulazione
@@ -204,6 +222,32 @@ with col_chart:
         plot_bgcolor='rgba(0,0,0,0)'
     )
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+
+    st.subheader("Consumo annuo del pianeta")
+    fig_earths = go.Figure()
+    fig_earths.add_trace(go.Scatter(
+        x=df["Anno"],
+        y=df["Terre Consumate"],
+        name="Terre consumate",
+        mode="lines+markers",
+        line=dict(color='#f59e0b', width=3),
+        marker=dict(size=5)
+    ))
+    fig_earths.add_hline(
+        y=1.0,
+        line_dash="dash",
+        line_color="rgba(100, 116, 139, 0.5)",
+        annotation_text="1 Terra"
+    )
+    fig_earths.update_layout(
+        hovermode="x unified",
+        margin=dict(l=0, r=0, t=30, b=0),
+        height=260,
+        yaxis_title="Terre/anno",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    st.plotly_chart(fig_earths, use_container_width=True, config={'displayModeBar': False})
     
     st.subheader("📉 Accumulo del Debito Ecologico")
     st.area_chart(df.set_index("Anno")["Debito Accumulato"], color="#6366f1", height=200)
@@ -211,6 +255,7 @@ with col_chart:
 with col_stats:
     last = df.iloc[-1]
     st.metric("Debito al 2075", f"{last['Debito Accumulato']} Terre")
+    st.metric("Consumo annuo 2075", f"{last['Terre Consumate']:.2f} Terre")
     
     st.divider()
     st.write("**🩺 Stato del Sistema**")
